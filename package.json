@@ -1,6 +1,6 @@
 {
   "name": "@cy873889292/ai-codereview",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "龙虾驱动的 AI Code Review CLI 工具",
   "main": "dist/index.js",
   "bin": {
@@ -17,21 +17,26 @@
     "lint": "eslint src/**/*.ts",
     "install-hooks": "bash scripts/install-hooks.sh"
   },
-  "keywords": ["code-review", "ai", "mcp", "cli"],
+  "keywords": [
+    "code-review",
+    "ai",
+    "mcp",
+    "cli"
+  ],
   "license": "MIT",
   "dependencies": {
-    "chalk": "^4.1.2",
-    "commander": "^11.1.0",
-    "openai": "^4.20.0",
-    "@anthropic-ai/sdk": "^0.10.0",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@anthropic-ai/sdk": "^0.91.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "typescript": "^5.3.3",
+    "@typescript-eslint/parser": "^6.21.0",
     "acorn": "^8.11.3",
     "acorn-walk": "^8.3.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "eslint": "^8.56.0",
     "glob": "^*",
-    "ora": "^5.4.1"
+    "openai": "^4.20.0",
+    "ora": "^5.4.1",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

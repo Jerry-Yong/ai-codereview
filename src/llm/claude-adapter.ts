@@ -20,7 +20,7 @@ export class ClaudeAdapter implements LLMAdapter {
       apiKey: this.config.apiKey,
     });
 
-    const response: Record<string, unknown> = await (client.messages || client).create({
+    const response: Record<string, unknown> = await client.messages.create({
       model: this.config.model || 'claude-3-sonnet-20240229',
       max_tokens: 4096,
       messages: [
