@@ -74,6 +74,8 @@ export interface LLMAnalysisInput {
   lintResults: LintIssue[];
   astInfo: ASTInfo[];
   analysisGoals: string[];
+  projectStructure?: string;
+  fileList?: string[];
 }
 
 export interface LLMAnalysisOutput {

@@ -26,7 +26,7 @@ export class ClaudeAdapter implements LLMAdapter {
 
     const response: Record<string, unknown> = await client.messages.create({
       model: this.config.model || 'claude-3-sonnet-20240229',
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',
