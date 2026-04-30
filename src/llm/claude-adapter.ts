@@ -16,9 +16,13 @@ export class ClaudeAdapter implements LLMAdapter {
     const anthropicModule = require('@anthropic-ai/sdk');
     const Anthropic = anthropicModule.default || anthropicModule.Anthropic || anthropicModule;
 
-    const client = new Anthropic({
+    const clientOptions: Record<string, unknown> = {
       apiKey: this.config.apiKey,
-    });
+    };
+    if (this.config.baseURL) {
+      clientOptions.baseURL = this.config.baseURL;
+    }
+    const client = new Anthropic(clientOptions);
 
     const response: Record<string, unknown> = await client.messages.create({
       model: this.config.model || 'claude-3-sonnet-20240229',
