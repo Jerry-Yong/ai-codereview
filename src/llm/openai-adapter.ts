@@ -12,8 +12,9 @@ export class OpenAIAdapter implements LLMAdapter {
   async analyze(input: LLMAnalysisInput): Promise<LLMAnalysisOutput> {
     const prompt = buildPrompt(input);
 
-    // 动态导入 openai
-    const { default: OpenAI } = await import('openai');
+    // 动态导入 openai，兼容不同模块导出方式
+    const openaiModule = await import('openai');
+    const OpenAI = (openaiModule as any).default || (openaiModule as any).OpenAI || openaiModule;
 
     const client = new OpenAI({
       apiKey: this.config.apiKey,

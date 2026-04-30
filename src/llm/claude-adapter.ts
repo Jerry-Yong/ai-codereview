@@ -12,14 +12,15 @@ export class ClaudeAdapter implements LLMAdapter {
   async analyze(input: LLMAnalysisInput): Promise<LLMAnalysisOutput> {
     const prompt = buildPrompt(input);
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Anthropic = require('@anthropic-ai/sdk').default || require('@anthropic-ai/sdk');
+    // 动态导入，兼容不同模块导出方式
+    const anthropicModule = require('@anthropic-ai/sdk');
+    const Anthropic = anthropicModule.default || anthropicModule.Anthropic || anthropicModule;
 
     const client = new Anthropic({
       apiKey: this.config.apiKey,
     });
 
-    const response: Record<string, unknown> = await client.messages.create({
+    const response: Record<string, unknown> = await (client.messages || client).create({
       model: this.config.model || 'claude-3-sonnet-20240229',
       max_tokens: 4096,
       messages: [

@@ -1,6 +1,6 @@
 {
   "name": "@cy873889292/ai-codereview",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "龙虾驱动的 AI Code Review CLI 工具",
   "main": "dist/index.js",
   "bin": {
