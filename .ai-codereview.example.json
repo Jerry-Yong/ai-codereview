@@ -1,0 +1,20 @@
+{
+  "llm": {
+    "provider": "openai",
+    "apiKey": "your-api-key-here",
+    "model": "gpt-4",
+    "baseURL": ""
+  },
+  "eslint": {
+    "configPath": ""
+  },
+  "scoring": {
+    "weights": {
+      "codeStyle": 0.2,
+      "architecture": 0.2,
+      "performance": 0.2,
+      "security": 0.2,
+      "maintainability": 0.2
+    }
+  }
+}
