@@ -3,17 +3,21 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
+import * as path from 'path';
 import { CodeReviewEngine } from '../core';
 import { loadConfig, Reporter } from '../utils';
 import { shouldFail } from '../scoring';
 import { CLIOptions, Grade } from '../types';
+
+// 动态读取 package.json 中的版本号
+const pkg = require(path.resolve(__dirname, '../../package.json'));
 
 const program = new Command();
 
 program
   .name('ai-codereview')
   .description('龙虾驱动的 AI Code Review CLI 工具')
-  .version('1.0.0')
+  .version(pkg.version)
   .option('--full', '全量扫描（扫描所有文件）', false)
   .option('--diff', '基于 git diff 扫描（默认）', true)
   .option('--strict', '使用更严格的评分标准', false)
