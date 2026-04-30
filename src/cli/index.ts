@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as path from 'path';
+import * as fs from 'fs';
 import { CodeReviewEngine } from '../core';
 import { loadConfig, Reporter } from '../utils';
 import { shouldFail } from '../scoring';
@@ -22,11 +23,13 @@ program
   .option('--diff', '基于 git diff 扫描（默认）', true)
   .option('--strict', '使用更严格的评分标准', false)
   .option('--fail-on <grade>', '低于该等级则退出码为1（A-G）')
+  .option('-o, --output <path>', '输出 Markdown 报告文件路径（默认: code-review-report.md）')
+  .option('--no-report', '不生成 Markdown 报告文件')
   .action(async (opts) => {
     await runReview(opts);
   });
 
-async function runReview(opts: { full: boolean; diff: boolean; strict: boolean; failOn?: string }): Promise<void> {
+async function runReview(opts: { full: boolean; diff: boolean; strict: boolean; failOn?: string; output?: string; report?: boolean }): Promise<void> {
   console.log('');
   console.log(chalk.bold.cyan('  🦞 龙虾驱动的 AI Code Review'));
   console.log(chalk.gray('  正在分析项目代码...'));
@@ -82,6 +85,16 @@ async function runReview(opts: { full: boolean; diff: boolean; strict: boolean; 
     // 输出报告
     const reporter = new Reporter(result);
     reporter.print();
+
+    // 生成 Markdown 报告文件
+    if (opts.report !== false) {
+      const outputPath = opts.output || 'code-review-report.md';
+      const resolvedPath = path.resolve(process.cwd(), outputPath);
+      const markdown = reporter.toMarkdown();
+      fs.writeFileSync(resolvedPath, markdown, 'utf-8');
+      console.log(chalk.green(`  报告已生成: ${resolvedPath}`));
+      console.log('');
+    }
 
     // 检查是否需要失败退出
     if (options.failOn && shouldFail(result.score.grade, options.failOn)) {

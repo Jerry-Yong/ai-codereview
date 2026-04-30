@@ -18,6 +18,141 @@ export class Reporter {
     this.printFooter();
   }
 
+  toMarkdown(): string {
+    const { score, issues, summary, lintIssues, filesAnalyzed } = this.result;
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    const lines: string[] = [];
+
+    lines.push('# AI Code Review Report');
+    lines.push('');
+    lines.push(`> 生成时间: ${dateStr}  `);
+    lines.push(`> Powered by AI Code Review - 龙虾驱动`);
+    lines.push('');
+
+    // 总览
+    lines.push('## 总览');
+    lines.push('');
+    lines.push(`| 指标 | 结果 |`);
+    lines.push(`| --- | --- |`);
+    lines.push(`| **评分等级** | **${score.grade}**（${score.totalScore} 分） |`);
+    lines.push(`| 扫描文件数 | ${filesAnalyzed} |`);
+    lines.push(`| 发现问题数 | ${issues.length} |`);
+    lines.push(`| ESLint 问题 | ${lintIssues.length} |`);
+    lines.push('');
+
+    // 分项评分
+    lines.push('## 分项评分');
+    lines.push('');
+    lines.push(`| 维度 | 分数 | 评级 |`);
+    lines.push(`| --- | --- | --- |`);
+    lines.push(`| 代码规范 | ${score.dimensions.codeStyle} | ${this.mdScoreEmoji(score.dimensions.codeStyle)} |`);
+    lines.push(`| 架构设计 | ${score.dimensions.architecture} | ${this.mdScoreEmoji(score.dimensions.architecture)} |`);
+    lines.push(`| 性能 | ${score.dimensions.performance} | ${this.mdScoreEmoji(score.dimensions.performance)} |`);
+    lines.push(`| 安全 | ${score.dimensions.security} | ${this.mdScoreEmoji(score.dimensions.security)} |`);
+    lines.push(`| 可维护性 | ${score.dimensions.maintainability} | ${this.mdScoreEmoji(score.dimensions.maintainability)} |`);
+    lines.push('');
+
+    // AI 总结
+    if (summary) {
+      lines.push('## AI 总结');
+      lines.push('');
+      lines.push(summary);
+      lines.push('');
+    }
+
+    // 问题列表
+    if (issues.length > 0) {
+      lines.push('## 问题列表');
+      lines.push('');
+
+      const sortedIssues = [...issues].sort((a, b) => {
+        const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
+        return (order[a.severity] ?? 5) - (order[b.severity] ?? 5);
+      });
+
+      // 按严重度分组
+      const groups: Record<string, ReviewIssue[]> = {};
+      for (const issue of sortedIssues) {
+        if (!groups[issue.severity]) groups[issue.severity] = [];
+        groups[issue.severity].push(issue);
+      }
+
+      const severityLabels: Record<string, string> = {
+        critical: 'CRITICAL - 严重问题',
+        high: 'HIGH - 高优先级',
+        medium: 'MEDIUM - 中等问题',
+        low: 'LOW - 建议改进',
+        info: 'INFO - 信息与亮点',
+      };
+
+      for (const severity of ['critical', 'high', 'medium', 'low', 'info']) {
+        const group = groups[severity];
+        if (!group || group.length === 0) continue;
+
+        lines.push(`### ${severityLabels[severity] || severity.toUpperCase()}（${group.length} 个）`);
+        lines.push('');
+
+        for (const issue of group) {
+          const typeLabel = this.mdTypeLabel(issue.type);
+          lines.push(`#### \`${issue.file}:${issue.line}\` [${typeLabel}]`);
+          lines.push('');
+          lines.push(`**问题**: ${issue.message}`);
+          lines.push('');
+          if (issue.suggestion) {
+            lines.push(`**建议**: ${issue.suggestion}`);
+            lines.push('');
+          }
+          lines.push('---');
+          lines.push('');
+        }
+      }
+    } else {
+      lines.push('## 问题列表');
+      lines.push('');
+      lines.push('未发现显著问题。');
+      lines.push('');
+    }
+
+    // ESLint 问题
+    if (lintIssues.length > 0) {
+      lines.push('## ESLint 静态分析');
+      lines.push('');
+      lines.push(`| 文件 | 行:列 | 级别 | 规则 | 描述 |`);
+      lines.push(`| --- | --- | --- | --- | --- |`);
+      for (const issue of lintIssues.slice(0, 50)) {
+        lines.push(`| ${issue.file} | ${issue.line}:${issue.column} | ${issue.severity} | ${issue.ruleId || '-'} | ${issue.message} |`);
+      }
+      if (lintIssues.length > 50) {
+        lines.push('');
+        lines.push(`> ... 还有 ${lintIssues.length - 50} 个 ESLint 问题未列出`);
+      }
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  private mdScoreEmoji(score: number): string {
+    if (score >= 90) return 'A - 优秀';
+    if (score >= 80) return 'B - 良好';
+    if (score >= 70) return 'C - 一般';
+    if (score >= 60) return 'D - 较差';
+    return 'F - 需改进';
+  }
+
+  private mdTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      codeStyle: '代码规范',
+      architecture: '架构设计',
+      performance: '性能',
+      security: '安全',
+      maintainability: '可维护性',
+    };
+    return labels[type] || type;
+  }
+
   private printHeader(): void {
     console.log('');
     console.log(chalk.bold.cyan('╔══════════════════════════════════════════════╗'));
